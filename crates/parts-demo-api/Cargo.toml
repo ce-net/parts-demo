@@ -5,4 +5,4 @@ edition = "2021"
 description = "Typed API of the parts.demo cell: Parts inventory demo of the ce-db typed collections: a Rust CLI and a tailnet page on state.store that update each other live (types only)"
 
 [dependencies]
-ce-wire = { git = "https://github.com/Leif-Rydenfalk/rust-stack", rev = "5225209", default-features = false, features = ["codec"] }
+ce-wire = { git = "https://github.com/Leif-Rydenfalk/rust-stack", rev = "bd353170d45dc2985ef42c525f616a333c1a3120", default-features = false, features = ["codec"] }

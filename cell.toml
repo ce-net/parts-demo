@@ -8,7 +8,7 @@ args = ["serve"]
 # The lane that made this cell; error.report routes a crash here.
 owner = "leif"
 # Cells this one calls, as <api>@<major>; the door starts them first, bottom-up.
-depends_on = []
+depends_on = ["state.store@2"]
 
 [launch]
 # The op the supervisor calls to decide the cell is up; it must answer within start_timeout_ms of the start.

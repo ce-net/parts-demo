@@ -1,0 +1,9 @@
+# parts.demo: the per-op hashes callers of this version rely on. Kept by ce_wire::check_lock in cargo test; commit it.
+version 1
+1 HealthOp 43c8815ba96fa6fe
+2 Status 31502d6f03afcdb2
+900 CellSpawn a1cc44c5ada0bdfd
+901 CellInstances b2e171d406a97d9a
+902 CellStop dc51e96fcabebf70
+903 CellDeploy d06425fbe1859c75
+904 CellBench 52a01c8e5ff886d8

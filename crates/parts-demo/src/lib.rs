@@ -1,109 +1,79 @@
-//! The one function of `parts.demo`: Parts inventory demo of the ce-db typed collections: a Rust CLI and a tailnet page on state.store that update each other live. Keep it one function; a second one is a second cell.
+//! The one function of `parts.demo`: show a parts inventory kept in state.store through ce-db, live in two faces (the
+//! `parts` CLI and the page `serve` hands out), so a change made in either appears in the other within a second.
+//! The schema is `parts-schema`; the page's types are generated from it (sdk/ts-web/parts-demo.ts).
 //!
-//! Serves many callers (ce-fleet standards/cells-serve-many.md). Every call is scoped to the caller's key, which
-//! ce-gate verified and put in `Caller.name`. State and limits are keyed by that owner. There is no default owner,
-//! no home path and no person's name in this code, and settings come from the deployment's environment.
+//! The store: `CE_DB_STORE` + `CE_DB_CAP` name a dev store (`ce-db-dev-store`); without them, `ce_db::open` finds
+//! state.store by name with the wallet grant of app `parts-demo` (a grant the store's owners have to issue first). The
+//! app is `parts-demo`, never `inventory`, so this demo cannot touch real stock.
+use ce_db::prelude::*;
+use ce_db::{Change, Collection};
 use parts_demo_api::*;
-use std::collections::HashMap;
-use std::sync::Mutex;
-use std::time::{Duration, Instant};
+use parts_schema::{Part, PartIndexes, LOW};
 
-/// The caller a request belongs to: the key ce-gate verified (hex of the requester's public key).
-#[derive(Clone, Debug, PartialEq, Eq, Hash)]
-pub struct Owner(String);
+pub mod web;
 
-impl Owner {
-    /// From `Caller.name`. An empty or oversized name is refused: no call runs without a caller.
-    pub fn of(caller: &str) -> Result<Owner, RunError> {
-        if caller.is_empty() || caller.len() > 256 {
-            return Err(RunError::Invalid("no caller identity".into()));
-        }
-        Ok(Owner(caller.to_string()))
-    }
+pub const APP: &str = "parts-demo";
 
-    pub fn as_str(&self) -> &str {
-        &self.0
-    }
+/// Open the demo's collection (see the crate doc for where the store comes from).
+pub fn parts() -> Result<Collection<Part>, DbError> {
+    ce_db::open(APP)?.collection::<Part>()
 }
 
-/// Per-deployment settings, read from the environment at start (`PARTS_DEMO_*`). The defaults serve many users.
-#[derive(Clone, Debug)]
-pub struct Config {
-    /// Calls one caller may make per minute; one busy caller never slows another.
-    pub calls_per_min: u32,
-    /// Distinct callers kept in memory at once; the least recently seen is dropped first.
-    pub max_owners: usize,
-}
-
-impl Default for Config {
-    fn default() -> Self {
-        Config { calls_per_min: 600, max_owners: 10_000 }
-    }
-}
-
-impl Config {
-    pub fn from_env() -> Config {
-        let d = Config::default();
-        let n = |k: &str, v: u64| std::env::var(k).ok().and_then(|s| s.parse().ok()).unwrap_or(v);
-        Config {
-            calls_per_min: n("PARTS_DEMO_CALLS_PER_MIN", d.calls_per_min as u64) as u32,
-            max_owners: n("PARTS_DEMO_MAX_OWNERS", d.max_owners as u64).max(1) as usize,
-        }
-    }
-}
-
-struct Slot {
-    window: Instant,
-    calls: u32,
-    seen: Instant,
-}
-
-/// The cell's state, shared by every connection. Each entry belongs to one owner and no call reads another's.
-/// Durable per-owner records go to state.store under a key that starts with the owner (standards/state-lives-in-the-state-db.md).
+/// The cell's state: the collection, opened once, its mirror shared by every call.
 pub struct Cell {
-    cfg: Config,
-    owners: Mutex<HashMap<Owner, Slot>>,
+    pub parts: Collection<Part>,
 }
 
 impl Cell {
-    pub fn new(cfg: Config) -> Cell {
-        Cell { cfg, owners: Mutex::new(HashMap::new()) }
+    pub fn new(parts: Collection<Part>) -> Cell {
+        Cell { parts }
     }
 
-    /// The one function, for one caller.
-    pub fn run(&self, caller: &str, r: RunReq) -> Result<RunResp, RunError> {
-        let owner = Owner::of(caller)?;
-        self.admit(&owner)?;
-        if r.input.is_empty() {
-            return Err(RunError::Invalid("empty input".into()));
-        }
-        // every shown value names its source (ce-ref, tests/refs.rs): this output is the caller's own input
-        Ok(RunResp { output: r.input, refs: vec![Ref { label: "input".into(), kind: "cell".into(), to: "parts.demo/Run".into() }] })
+    pub fn status(&self) -> Result<StatusResp, StatusError> {
+        let all = self.parts.by_qty(..).fetch().map_err(|e| match e {
+            DbError::Unavailable { .. } => StatusError::Unavailable(e.to_string()),
+            e => StatusError::Failed(e.to_string()),
+        })?;
+        let s = self.parts.stats();
+        let src = |label: &str| Ref { label: label.into(), kind: "cell".into(), to: format!("state.store/List#{APP}/parts") };
+        Ok(StatusResp {
+            app: APP.into(),
+            collection: "parts".into(),
+            rows: all.len() as u64,
+            units: all.iter().map(|p| p.qty as u64).sum(),
+            low: all.iter().filter(|p| p.qty < LOW).count() as u64,
+            watchers: s.watchers as u32,
+            link: format!("{:?}", s.link),
+            refs: ["app", "collection", "rows", "units", "low", "watchers", "link"].iter().map(|l| src(l)).collect(),
+        })
     }
+}
 
-    /// Calls this owner made in the current minute.
-    pub fn calls(&self, owner: &Owner) -> u32 {
-        self.owners.lock().unwrap_or_else(|e| e.into_inner()).get(owner).map(|s| s.calls).unwrap_or(0)
-    }
+/// One line of `parts list`.
+pub fn line(p: &Part) -> String {
+    format!("{}  {:<6} {:>6}  {}{}", p.id, p.bin, p.qty, p.name, p.supplier.as_deref().map(|s| format!("  ({s})")).unwrap_or_default())
+}
 
-    fn admit(&self, owner: &Owner) -> Result<(), RunError> {
-        let now = Instant::now();
-        let mut m = self.owners.lock().unwrap_or_else(|e| e.into_inner());
-        if !m.contains_key(owner) && m.len() >= self.cfg.max_owners {
-            if let Some(old) = m.iter().min_by_key(|(_, s)| s.seen).map(|(o, _)| o.clone()) {
-                m.remove(&old);
-            }
-        }
-        let s = m.entry(owner.clone()).or_insert(Slot { window: now, calls: 0, seen: now });
-        if now.duration_since(s.window) >= Duration::from_secs(60) {
-            s.window = now;
-            s.calls = 0;
-        }
-        s.seen = now;
-        if s.calls >= self.cfg.calls_per_min {
-            return Err(RunError::Limited(format!("{} calls a minute per caller", self.cfg.calls_per_min)));
-        }
-        s.calls += 1;
-        Ok(())
+fn clock(ms: i64) -> String {
+    let s = (ms / 1000).rem_euclid(86_400);
+    format!("{:02}:{:02}:{:02}.{:03}", s / 3600, (s / 60) % 60, s % 60, ms.rem_euclid(1000))
+}
+
+/// One line of `parts watch` (UTC clock, the change, the row, which face made it).
+pub fn change_line(c: &Change<Part>) -> String {
+    let now = Millis::now().0;
+    let by = |p: &Part| p.by.as_deref().map(|b| format!("  by {b}")).unwrap_or_default();
+    match c {
+        Change::Added(p) => format!("{}  added    {:<6} {:<24} qty {}{}", clock(now), p.bin, p.name, p.qty, by(p)),
+        Change::Changed { old, new } if old.qty != new.qty => format!("{}  changed  {:<6} {:<24} qty {} -> {}{}", clock(now), new.bin, new.name, old.qty, new.qty, by(new)),
+        Change::Changed { new, .. } => format!("{}  changed  {:<6} {:<24} qty {}{}", clock(now), new.bin, new.name, new.qty, by(new)),
+        Change::Removed(k) => format!("{}  removed  {k}", clock(now)),
+        Change::Synced => format!("{}  synced   (live from here)", clock(now)),
     }
+}
+
+/// Stamp a write from the CLI.
+pub fn by_cli(p: &mut Part) {
+    p.by = Some("cli".into());
+    p.at = Some(Millis::now());
 }

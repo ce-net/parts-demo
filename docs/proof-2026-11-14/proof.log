@@ -1,0 +1,16 @@
+page fetch 404 https://ce-net.com/assets/fonts/g-geist-v5-gyByhwUxId8gMEwcGFU.woff2
+page console: Failed to load resource: the server responded with a status of 404 ()
+page fetch 404 https://ce-net.com/assets/fonts/g-jetbrainsmono-v24-tDbv2o-flEEny0FZhsfKu5WU4zr3E_BX0PnT8RD8yKwBNntkaToggR7BYRbKPxDcwg.woff2
+page console: Failed to load resource: the server responded with a status of 404 ()
+page: Live, rows 8
+cli: parts take 01M7CP6G4FCCT8FFW7PZSTT84X 37 -> 01M7CP6G4FCCT8FFW7PZSTT84X  A4        463  M3x8 socket screw  (Bossard)
+page saw the CLI's take (500 -> 463) 64 ms after the CLI call started
+page saw the CLI's add 44 ms after the CLI call started
+parts watch printed the page's + (463 -> 464) 90 ms after the click: 09:30:09.220  changed  A4     M3x8 socket screw        qty 463 -> 464  by web
+cli: parts set 01M7CP6G4FCCT8FFW7PZSTT84X 18 -> 01M7CP6G4FCCT8FFW7PZSTT84X  A4         18  M3x8 socket screw  (Bossard)
+bin A4 view (byBin query watch) saw the CLI's set to 18 61 ms after the CLI call started
+page fetch 404 https://ce-net.com/assets/fonts/g-geist-v5-gyByhwUxId8gMEwcGFU.woff2
+page console: Failed to load resource: the server responded with a status of 404 ()
+page fetch 404 https://ce-net.com/assets/fonts/g-jetbrainsmono-v24-tDbv2o-flEEny0FZhsfKu5WU4zr3E_BX0PnT8RD8yKwBNntkaToggR7BYRbKPxDcwg.woff2
+page console: Failed to load resource: the server responded with a status of 404 ()
+horizontal scroll at 390: false

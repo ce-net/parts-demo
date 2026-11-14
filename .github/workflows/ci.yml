@@ -31,11 +31,13 @@ jobs:
           ce-load-lint check .
       - name: regenerate the SDKs and fail on drift
         run: |
-          cargo install --git https://github.com/Leif-Rydenfalk/rust-stack --rev 1dbc6f64c7ae2ade9bcefce6b3da8466d2019bc1 ce-wire-gen --locked || cargo install --git https://github.com/Leif-Rydenfalk/rust-stack --rev 1dbc6f64c7ae2ade9bcefce6b3da8466d2019bc1 ce-wire-gen
+          cargo install --git https://github.com/Leif-Rydenfalk/rust-stack --rev 2d463628f491170b18f249bec13d014faf2317c7 ce-wire-gen --locked || cargo install --git https://github.com/Leif-Rydenfalk/rust-stack --rev 2d463628f491170b18f249bec13d014faf2317c7 ce-wire-gen
           ce-wire-gen --lang ts crates/parts-demo-api/src/lib.rs -o sdk/ts
           ce-wire-gen --lang ts-web crates/parts-demo-api/src/lib.rs -o sdk/ts-web
           ce-wire-gen --lang swift crates/parts-demo-api/src/lib.rs -o sdk/swift
-          git diff --exit-code sdk/ || (echo 'sdk/ is stale: run ce-wire-gen and commit' && exit 1)
+          ce-wire-gen --records crates/parts-schema/src/lib.rs --lang ts-web -o sdk/ts-web
+          ce-wire-gen --records crates/parts-schema/src/lib.rs --lang json -o schemas
+          git diff --exit-code sdk/ schemas/ || (echo 'sdk/ is stale: run ce-wire-gen and commit' && exit 1)
       - name: callers of the last commit keep working (an api change without a freeze fails)
         run: ce-wire-gen check crates/parts-demo-api/src/lib.rs --base HEAD~1
       - name: the cell's skill is there and current
