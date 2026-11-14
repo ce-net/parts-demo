@@ -1,0 +1,11 @@
+[workspace]
+resolver = "2"
+members = ["crates/parts-demo-api", "crates/parts-demo"]
+
+# Small per process (Leif 2026-10-18: "much much less memory ... per cell"; site-cells DESIGN.md: 226 KB PSS, 1 thread)
+[profile.release]
+opt-level = "s"
+lto = true
+codegen-units = 1
+panic = "abort"
+strip = true

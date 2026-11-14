@@ -1,0 +1,17 @@
+[package]
+name = "parts-demo"
+version = "0.1.0"
+edition = "2021"
+description = "The parts.demo cell: Parts inventory demo of the ce-db typed collections: a Rust CLI and a tailnet page on state.store that update each other live"
+
+[dependencies]
+parts-demo-api = { path = "../parts-demo-api" }
+# std threads, no async runtime: one thread per process at rest (blocking::Server); add tokio only when the cell needs async I/O
+ce-wire = { git = "https://github.com/Leif-Rydenfalk/rust-stack", rev = "5225209", default-features = false, features = ["blocking-door"] }
+ce-gate = { git = "https://github.com/Leif-Rydenfalk/rust-stack", rev = "5225209" }
+
+[dev-dependencies]
+ce-wire = { git = "https://github.com/Leif-Rydenfalk/rust-stack", rev = "5225209" }
+tokio = { version = "1", features = ["rt", "macros", "net"] }
+# every shown value carries its source (tests/refs.rs)
+ce-ref = { git = "https://github.com/Leif-Rydenfalk/ce-load", rev = "f3ac426" }

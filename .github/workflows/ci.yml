@@ -1,0 +1,44 @@
+# Made by cell.forge. Private deps are read with per-repo read-only deploy keys: secret CE_DEPLOY_KEYS holds one key per
+# private dep repo (comment git@github.com:<owner>/<repo>.git; private halves in keys as CI_DEPLOY_KEY_<OWNER>_<REPO>).
+# cell.forge sets the secret when it publishes. No personal token.
+# Manual only (Leif 2026-10-14 00:12 CEST: "We have used 90% of our actions on GitHub"): tests run on our own runner
+# ; run this by hand with `gh workflow run test`.
+name: test
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      CARGO_NET_GIT_FETCH_WITH_CLI: "true"
+      CE_WIRE_GEN_ONLINE: "1"
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - name: private git deps (read-only deploy keys)
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.CE_DEPLOY_KEYS }}
+      - name: cargo test
+        run: cargo test --all-targets
+      - name: every load goes through ce-load (no hand-written Loading..., the error shown at once and sent to error.report)
+        run: |
+          cargo install --git ssh://git@github.com/Leif-Rydenfalk/ce-load --rev bacdd4b ce-load-lint --locked || cargo install --git ssh://git@github.com/Leif-Rydenfalk/ce-load --rev bacdd4b ce-load-lint
+          ce-load-lint check .
+      - name: regenerate the SDKs and fail on drift
+        run: |
+          cargo install --git https://github.com/Leif-Rydenfalk/rust-stack --rev 1dbc6f64c7ae2ade9bcefce6b3da8466d2019bc1 ce-wire-gen --locked || cargo install --git https://github.com/Leif-Rydenfalk/rust-stack --rev 1dbc6f64c7ae2ade9bcefce6b3da8466d2019bc1 ce-wire-gen
+          ce-wire-gen --lang ts crates/parts-demo-api/src/lib.rs -o sdk/ts
+          ce-wire-gen --lang ts-web crates/parts-demo-api/src/lib.rs -o sdk/ts-web
+          ce-wire-gen --lang swift crates/parts-demo-api/src/lib.rs -o sdk/swift
+          git diff --exit-code sdk/ || (echo 'sdk/ is stale: run ce-wire-gen and commit' && exit 1)
+      - name: callers of the last commit keep working (an api change without a freeze fails)
+        run: ce-wire-gen check crates/parts-demo-api/src/lib.rs --base HEAD~1
+      - name: the cell's skill is there and current
+        run: |
+          cargo install --git https://github.com/Leif-Rydenfalk/cell-skills skill-write --locked || cargo install --git https://github.com/Leif-Rydenfalk/cell-skills skill-write
+          skill-write check .

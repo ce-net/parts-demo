@@ -1,0 +1,23 @@
+# One repo = one cell = one function (ce-fleet standards/a-cell-is-one-function.md). Made by cell.forge.
+# Contract: rust-stack docs/CELL-RECIPE.md (launch, depends_on, health, versions).
+[cell]
+api = "parts.demo"
+kind = "function"
+crate = "parts-demo"
+args = ["serve"]
+# The lane that made this cell; error.report routes a crash here.
+owner = "leif"
+# Cells this one calls, as <api>@<major>; the door starts them first, bottom-up.
+depends_on = []
+
+[launch]
+# The op the supervisor calls to decide the cell is up; it must answer within start_timeout_ms of the start.
+health = "HealthOp"
+start_timeout_ms = 5000
+# A crashed cell restarts with backoff from the first to the second value.
+restart_backoff_ms = [1000, 300000]
+
+[limits]
+# The most its folders (~/.local/share|.cache|.local/state/<crate>) may hold; the door makes them read-only past it
+# and cell-check fails a cell.toml without it (DISK-FULL-NEVER-AGAIN #4).
+disk_bytes = "256M"

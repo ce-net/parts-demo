@@ -1,0 +1,8 @@
+[package]
+name = "parts-demo-api"
+version = "0.1.0"
+edition = "2021"
+description = "Typed API of the parts.demo cell: Parts inventory demo of the ce-db typed collections: a Rust CLI and a tailnet page on state.store that update each other live (types only)"
+
+[dependencies]
+ce-wire = { git = "https://github.com/Leif-Rydenfalk/rust-stack", rev = "5225209", default-features = false, features = ["codec"] }
