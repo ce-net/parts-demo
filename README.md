@@ -51,7 +51,7 @@ page then uses wire.ws-door (`#cap=...&g=...&w=wss://...`). The app is never `in
 watchers, link, each value with its ce-ref), and the shared `CellSpawn/CellInstances/CellStop/CellDeploy/CellBench`
 (900-904). Clients in `sdk/ts`, `sdk/ts-web`, `sdk/swift` (ce-wire-gen).
 
-## Proof (2026-11-14, a dev host, dev store, headless Chromium 156)
+## Proof (2026-11-14, dev store, headless Chromium 156)
 
 `docs/proof-2026-11-14/`: `proof.log` (timings), `parts-watch.log` (the CLI watch), screenshots, `shot.cjs` (the
 script). The CLI's `take` showed on the page 64 ms after the CLI call started, its `add` 44 ms after; the page's `+`
@@ -60,5 +60,17 @@ dev store; a run across two real replicas needs the granted app above.
 
 ## Test
 
+Dependencies not yet public: the ce-net wire crates (`ce-wire`, `ce-gate`) and `ce-ref` are not open yet (see the
+ce-db-rs README); CI reads them with read-only deploy keys.
+
+
 `cargo test` (the api over ce-wire with a refusal, the Status refs, a CLI write reaching another watcher within a
 second, the page and the dev-only pipe), all against ce-db-dev stores.
+
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md).
+
+## License
+
+Licensed under the Apache License, Version 2.0 ([LICENSE](LICENSE)). See [NOTICE](NOTICE).

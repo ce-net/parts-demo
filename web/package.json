@@ -1,6 +1,7 @@
 {
   "name": "parts-demo-web",
   "private": true,
+  "license": "Apache-2.0",
   "type": "module",
   "description": "The parts.demo page: built into web/dist/app.js, which the cell embeds",
   "scripts": {
@@ -8,7 +9,7 @@
     "build": "tsc -p tsconfig.json && esbuild src/app.ts --bundle --format=esm --target=es2022 --minify --legal-comments=none --outfile=dist/app.js"
   },
   "dependencies": {
-    "@ce-net/db": "git+https://github.com/Leif-Rydenfalk/ce-db-ts.git#5420e3587860f21cce02bfab1d27be22bc23ad60"
+    "@ce-net/db": "git+https://github.com/ce-net/ce-db-ts.git#d40c88ce41b628a20eeaac5565e624aa5d13df51"
   },
   "devDependencies": {
     "esbuild": "0.24.0",

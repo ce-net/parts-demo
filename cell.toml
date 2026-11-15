@@ -22,15 +22,3 @@ restart_backoff_ms = [1000, 300000]
 # and cell-check fails a cell.toml without it (DISK-FULL-NEVER-AGAIN #4).
 disk_bytes = "256M"
 
-[stamp]
-id = "cell:parts.demo"
-kind = "cell"
-path = "cell.toml"
-updated_at = 2026-11-14T09:32:10Z
-version = "0.2"
-access = "internal"
-canonical_of = []
-duplicate_of = ""
-owner = "the maintainers"
-source_of_truth = "https://github.com/Leif-Rydenfalk/parts-demo"
-stale_after = 180

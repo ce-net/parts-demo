@@ -2,6 +2,7 @@
 name = "parts-demo"
 version = "0.1.0"
 edition = "2021"
+license = "Apache-2.0"
 description = "The parts.demo cell and the parts CLI: a parts inventory on the ce-db typed collections, live between a Rust CLI and a page"
 
 [[bin]]
@@ -16,13 +17,13 @@ path = "src/main.rs"
 [dependencies]
 parts-demo-api = { path = "../parts-demo-api" }
 parts-schema = { path = "../parts-schema" }
-ce-db = { git = "https://github.com/Leif-Rydenfalk/ce-db-rs", rev = "0cc326e0fcdb" }
+ce-db = { git = "https://github.com/ce-net/ce-db-rs", rev = "a3fa6a4ecbdec595edf8fca39befc73d8f18b157" }
 # one ce-wire for the graph: the rev state-store-api (under ce-db) pins
 ce-wire = { git = "https://github.com/Leif-Rydenfalk/rust-stack", rev = "bd353170d45dc2985ef42c525f616a333c1a3120", default-features = false, features = ["blocking-door", "client"] }
 ce-gate = { git = "https://github.com/Leif-Rydenfalk/rust-stack", rev = "bd353170d45dc2985ef42c525f616a333c1a3120" }
 tungstenite = { version = "0.24", default-features = false, features = ["handshake"] }
 
 [dev-dependencies]
-ce-db-dev = { git = "https://github.com/Leif-Rydenfalk/ce-db-rs", rev = "0cc326e0fcdb" }
+ce-db-dev = { git = "https://github.com/ce-net/ce-db-rs", rev = "a3fa6a4ecbdec595edf8fca39befc73d8f18b157" }
 # every shown value carries its source (tests/refs.rs)
 ce-ref = { git = "https://github.com/Leif-Rydenfalk/ce-load", rev = "f3ac426" }

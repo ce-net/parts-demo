@@ -2,7 +2,8 @@
 name = "parts-schema"
 version = "0.1.0"
 edition = "2021"
+license = "Apache-2.0"
 description = "The parts-demo schema: one #[derive(Record)] struct, the source of the Rust, TypeScript and JSON schema of the parts collection"
 
 [dependencies]
-ce-db-core = { git = "https://github.com/Leif-Rydenfalk/ce-db-rs", rev = "0cc326e0fcdb" }
+ce-db-core = { git = "https://github.com/ce-net/ce-db-rs", rev = "a3fa6a4ecbdec595edf8fca39befc73d8f18b157" }

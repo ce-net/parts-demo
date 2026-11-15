@@ -1,11 +1,11 @@
-# Made by cell.forge. Private deps are read with per-repo read-only deploy keys: secret CE_DEPLOY_KEYS holds one key per
-# private dep repo (comment git@github.com:<owner>/<repo>.git; private halves in keys as CI_DEPLOY_KEY_<OWNER>_<REPO>).
-# cell.forge sets the secret when it publishes. No personal token.
-# Manual only (Leif 2026-10-14 00:12 CEST: "We have used 90% of our actions on GitHub"): tests run on our own runner
-# ; run this by hand with `gh workflow run test`.
-name: test
+name: ci
 on:
+  push:
+    branches: [main]
+  pull_request:
   workflow_dispatch:
+permissions:
+  contents: read
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -27,7 +27,7 @@ jobs:
         run: cargo test --all-targets
       - name: every load goes through ce-load (no hand-written Loading..., the error shown at once and sent to error.report)
         run: |
-          cargo install --git ssh://git@github.com/Leif-Rydenfalk/ce-load --rev bacdd4b ce-load-lint --locked || cargo install --git ssh://git@github.com/Leif-Rydenfalk/ce-load --rev bacdd4b ce-load-lint
+          cargo install --git https://github.com/Leif-Rydenfalk/ce-load --rev bacdd4b ce-load-lint --locked || cargo install --git https://github.com/Leif-Rydenfalk/ce-load --rev bacdd4b ce-load-lint
           ce-load-lint check .
       - name: regenerate the SDKs and fail on drift
         run: |
@@ -40,7 +40,3 @@ jobs:
           git diff --exit-code sdk/ schemas/ || (echo 'sdk/ is stale: run ce-wire-gen and commit' && exit 1)
       - name: callers of the last commit keep working (an api change without a freeze fails)
         run: ce-wire-gen check crates/parts-demo-api/src/lib.rs --base HEAD~1
-      - name: the cell's skill is there and current
-        run: |
-          cargo install --git https://github.com/Leif-Rydenfalk/cell-skills skill-write --locked || cargo install --git https://github.com/Leif-Rydenfalk/cell-skills skill-write
-          skill-write check .

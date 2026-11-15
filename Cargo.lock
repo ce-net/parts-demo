@@ -84,7 +84,7 @@ dependencies = [
 [[package]]
 name = "ce-db"
 version = "0.1.0"
-source = "git+https://github.com/Leif-Rydenfalk/ce-db-rs?rev=0cc326e0fcdb#0cc326e0fcdb55cd3b8d7cac74f3bf6477b05d4e"
+source = "git+https://github.com/ce-net/ce-db-rs?rev=a3fa6a4ecbdec595edf8fca39befc73d8f18b157#a3fa6a4ecbdec595edf8fca39befc73d8f18b157"
 dependencies = [
  "ce-db-core",
  "ce-gate",
@@ -97,7 +97,7 @@ dependencies = [
 [[package]]
 name = "ce-db-core"
 version = "0.1.0"
-source = "git+https://github.com/Leif-Rydenfalk/ce-db-rs?rev=0cc326e0fcdb#0cc326e0fcdb55cd3b8d7cac74f3bf6477b05d4e"
+source = "git+https://github.com/ce-net/ce-db-rs?rev=a3fa6a4ecbdec595edf8fca39befc73d8f18b157#a3fa6a4ecbdec595edf8fca39befc73d8f18b157"
 dependencies = [
  "ce-db-derive",
  "getrandom",
@@ -107,7 +107,7 @@ dependencies = [
 [[package]]
 name = "ce-db-derive"
 version = "0.1.0"
-source = "git+https://github.com/Leif-Rydenfalk/ce-db-rs?rev=0cc326e0fcdb#0cc326e0fcdb55cd3b8d7cac74f3bf6477b05d4e"
+source = "git+https://github.com/ce-net/ce-db-rs?rev=a3fa6a4ecbdec595edf8fca39befc73d8f18b157#a3fa6a4ecbdec595edf8fca39befc73d8f18b157"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -117,7 +117,7 @@ dependencies = [
 [[package]]
 name = "ce-db-dev"
 version = "0.1.0"
-source = "git+https://github.com/Leif-Rydenfalk/ce-db-rs?rev=0cc326e0fcdb#0cc326e0fcdb55cd3b8d7cac74f3bf6477b05d4e"
+source = "git+https://github.com/ce-net/ce-db-rs?rev=a3fa6a4ecbdec595edf8fca39befc73d8f18b157#a3fa6a4ecbdec595edf8fca39befc73d8f18b157"
 dependencies = [
  "ce-wire",
  "serde_json",

@@ -2,6 +2,7 @@
 name = "parts-demo-api"
 version = "0.1.0"
 edition = "2021"
+license = "Apache-2.0"
 description = "Typed API of the parts.demo cell: Parts inventory demo of the ce-db typed collections: a Rust CLI and a tailnet page on state.store that update each other live (types only)"
 
 [dependencies]
